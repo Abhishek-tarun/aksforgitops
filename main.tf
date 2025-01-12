@@ -1,6 +1,6 @@
 ##AKS Cluster setup
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-    name = "aks_cluster"
+    name = "aks-cluster"
     location = azurerm_resource_group.rg-aks.location
     resource_group_name = azurerm_resource_group.rg-aks.name
     dns_prefix = "aks_dns"
@@ -12,13 +12,11 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
       vnet_subnet_id = azurerm_subnet.aks_subnet.id
 
     }
-}
-
-##identity block
-identity {
-    type = "SystemAssigned"
-}
-
-tags = {
-    Environment = "dev"
+    ##identity block
+    identity {
+        type = "SystemAssigned"
+    }
+    tags = {
+        environment = "dev"
+    }
 }   
