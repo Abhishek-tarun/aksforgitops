@@ -1,0 +1,56 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "terraform"
+  terraform:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Environment variables to connect with azure
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a single command using the runners shell
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.10.4
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Apply Terraform
+        run: terraform apply -auto-approve
+
+      - name: Set up kubectl
+        run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
+
+      - name: Install Argo CD
+        run: |
+          kubectl create namespace argocd
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+      - name: Expose Argo CD Server
+        run: |
+          kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
