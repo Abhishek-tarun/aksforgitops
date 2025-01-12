@@ -42,6 +42,10 @@ jobs:
 
       - name: Apply Terraform
         run: terraform apply -auto-approve
+      - name: Azure Login 
+        uses: azure/login@v1 
+        with: 
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up kubectl
         run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
