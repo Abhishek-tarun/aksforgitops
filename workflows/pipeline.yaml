@@ -15,23 +15,18 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "terraform"
   terraform:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Environment variables to connect with azure
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -42,12 +37,6 @@ jobs:
 
       - name: Apply Terraform
         run: terraform apply -auto-approve
-
-      # Azure Login
-      - name: Azure Login 
-        uses: azure/login@v1 
-        with: 
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up kubectl
         run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
