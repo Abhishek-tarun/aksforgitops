@@ -42,6 +42,8 @@ jobs:
 
       - name: Apply Terraform
         run: terraform apply -auto-approve
+
+      # Azure Login
       - name: Azure Login 
         uses: azure/login@v1 
         with: 
