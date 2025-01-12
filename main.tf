@@ -20,3 +20,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
         environment = "dev"
     }
 }   
+
+output kubeconfig {
+    value = azurerm_kubernetes_cluster.aks_cluster.kube_config_raw
+    sensitive = true
+}
+
